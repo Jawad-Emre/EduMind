@@ -1,0 +1,6 @@
+{
+  "buildAptPackages": ["libmagic1", "file"],
+  "deploy": {
+    "aptPackages": ["libmagic1", "file"]
+  }
+}
