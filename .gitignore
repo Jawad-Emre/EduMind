@@ -1,0 +1,9 @@
+venv/
+.env
+__pycache__/
+*.pyc
+chroma_data/
+*.pdf
+uploads/
+download_model.py
+test_chunking.py
