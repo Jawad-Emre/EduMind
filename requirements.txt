@@ -90,7 +90,7 @@ pyreadline3==3.5.6
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 python-jose==3.5.0
-python-magic-bin==0.4.14
+python-magic
 python-multipart==0.0.32
 PyYAML==6.0.3
 realtime==2.31.0
