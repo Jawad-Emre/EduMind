@@ -51,10 +51,10 @@ async def process_document_pipeline(material_id: int, file_bytes: bytes, source_
             if source_type != SourceTypeEnum.pdf:
                 raise ExtractionError(f"Ingestion for source_type={source_type} not yet implemented")
 
-            pages = extract_text_from_pdf(file_bytes)
-            chunks = chunk_pages(pages)
-            embedded = embed_chunks(chunks)
-            stored = add_chunks(embedded, material_id=material_id)
+            pages = await asyncio.to_thread(extract_text_from_pdf, file_bytes)
+            chunks = chunk_pages(pages)  # keep sync if it's pure CPU-light string work
+            embedded = await asyncio.to_thread(embed_chunks, chunks)
+            stored = await asyncio.to_thread(add_chunks, embedded, material_id=material_id)
 
             for c in stored:
                 db.add(Chunk(
