@@ -54,16 +54,8 @@ async def process_document_pipeline(material_id: int, file_bytes: bytes, source_
             pages = await asyncio.to_thread(extract_text_from_pdf, file_bytes)
             chunks = chunk_pages(pages)  # keep sync if it's pure CPU-light string work
             embedded = await asyncio.to_thread(embed_chunks, chunks)
-            stored = await asyncio.to_thread(add_chunks, embedded, material_id=material_id)
+            stored = await add_chunks(db, embedded, material_id=material_id)
 
-            for c in stored:
-                db.add(Chunk(
-                    material_id=material_id,
-                    content=c["content"],
-                    chunk_index=c["chunk_index"],
-                    embedding_id=c["embedding_id"],
-                    page_number=c["page_number"],
-                ))
 
             material.upload_status = UploadStatusEnum.ready
             await db.commit()

@@ -8,6 +8,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from pgvector.sqlalchemy import Vector
 
 
 # ---------- Enums ----------
@@ -139,11 +140,13 @@ class Chunk(Base):
     material_id: Mapped[int] = mapped_column(ForeignKey("study_materials.id"))
     content: Mapped[str] = mapped_column(Text)
     chunk_index: Mapped[int] = mapped_column(Integer)
-    embedding_id: Mapped[str] = mapped_column(String(255))
+    embedding_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     page_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    embedding: Mapped[list[float]] = mapped_column(Vector(768))
 
     material: Mapped["StudyMaterial"] = relationship(back_populates="chunks")
 
+    material: Mapped["StudyMaterial"] = relationship(back_populates="chunks")
 
 class SessionSummary(Base):
     __tablename__ = "session_summaries"

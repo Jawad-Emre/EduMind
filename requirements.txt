@@ -72,6 +72,7 @@ orjson==3.11.9
 overrides==7.7.0
 packaging==26.2
 passlib==1.7.4
+pgvector
 postgrest==2.31.0
 propcache==0.5.2
 protobuf==7.35.1

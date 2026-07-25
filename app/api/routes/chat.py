@@ -11,6 +11,7 @@ from app.generation.prompt_builder import build_prompt
 from app.generation.llm_client import generate_response
 from app.core.exceptions import ExtractionError
 from app.profiling.level_detector import score_message_signal, update_confidence_from_message, score_to_level
+from app.retrieval.vector_store import query_similar
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -56,7 +57,7 @@ async def chat(
     user_material_ids = [row[0] for row in result.all()]
 
     query_embedding = embed_chunks([{"content": content, "page_number": 0, "chunk_index": 0}])[0]["embedding"]
-    retrieved = query_similar(query_embedding, material_ids=user_material_ids, top_k=5) if user_material_ids else []
+    retrieved = await query_similar(db, query_embedding, material_ids=user_material_ids, top_k=5) if user_material_ids else []
 
     result = await db.execute(
         select(Message).where(Message.session_id == session.id).order_by(Message.created_at)
