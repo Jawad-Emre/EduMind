@@ -12,3 +12,10 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 async def trigger_sweep(db: AsyncSession = Depends(get_db)):
     count = await sweep_stale_sessions(db)
     return {"closed_sessions": count}
+
+from app.retrieval.vector_store import wipe_collection
+
+@router.post("/debug/wipe-chroma")
+async def debug_wipe_chroma():
+    result = wipe_collection()
+    return result
