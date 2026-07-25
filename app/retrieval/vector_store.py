@@ -88,14 +88,3 @@ def query_similar(query_embedding: list[float], material_ids: list[int] | None =
         })
 
     return matches
-def wipe_collection():
-    """Deletes the entire collection and all its data. Destructive — use with care."""
-    global _client, _collection
-    if _client is None:
-        _client = chromadb.PersistentClient(path=CHROMA_DIR)
-    try:
-        _client.delete_collection(name=COLLECTION_NAME)
-    except Exception:
-        pass  # collection may not exist, that's fine
-    _collection = None  # force recreation on next _get_collection() call
-    return {"status": "wiped"}
