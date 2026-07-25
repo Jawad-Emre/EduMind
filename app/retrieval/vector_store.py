@@ -27,19 +27,22 @@ async def query_similar(
     material_ids: list[int] | None = None,
     top_k: int = 5,
 ) -> list[dict]:
-    stmt = select(Chunk).order_by(Chunk.embedding.cosine_distance(query_embedding)).limit(top_k)
+    distance = Chunk.embedding.cosine_distance(query_embedding).label("distance")
+
+    stmt = select(Chunk, distance).order_by(distance).limit(top_k)
 
     if material_ids:
         stmt = stmt.where(Chunk.material_id.in_(material_ids))
 
     result = await db.execute(stmt)
-    rows = result.scalars().all()
+    rows = result.all()  # each row is a (Chunk, distance) tuple now
 
     matches = []
-    for row in rows:
+    for chunk, dist in rows:
         matches.append({
-            "content": row.content,
-            "page_number": row.page_number,
-            "material_id": row.material_id,
+            "content": chunk.content,
+            "page_number": chunk.page_number,
+            "material_id": chunk.material_id,
+            "distance": dist,
         })
     return matches
