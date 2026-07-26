@@ -8,7 +8,7 @@ _model = None  # loaded once, reused across calls — avoids reloading the model
 def _get_model() -> SentenceTransformer:
     global _model
     if _model is None:
-        _model = SentenceTransformer("BAAI/bge-base-en-v1.5")
+        _model = SentenceTransformer("BAAI/bge-small-en-v1.5")
     return _model
 
 

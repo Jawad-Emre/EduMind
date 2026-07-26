@@ -142,9 +142,7 @@ class Chunk(Base):
     chunk_index: Mapped[int] = mapped_column(Integer)
     embedding_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     page_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    embedding: Mapped[list[float]] = mapped_column(Vector(768))
-
-    material: Mapped["StudyMaterial"] = relationship(back_populates="chunks")
+    embedding: Mapped[list[float]] = mapped_column(Vector(384))
 
     material: Mapped["StudyMaterial"] = relationship(back_populates="chunks")
 
