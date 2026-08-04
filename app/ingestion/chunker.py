@@ -1,16 +1,22 @@
-import re
-
 from app.core.exceptions import ExtractionError
 
 CHUNK_SIZE = 600              # target characters per chunk (soft target, not a hard ceiling)
-CHUNK_OVERLAP_SENTENCES = 1   # trailing sentences repeated into the next chunk, for context continuity
-MIN_CHUNK_SIZE = 50           # chunks smaller than this get merged into the previous chunk
+CHUNK_OVERLAP_SENTENCES = 2   # trailing sentences repeated into the next chunk, for context continuity
+MIN_CHUNK_SIZE = 150           # chunks smaller than this get merged into the previous chunk
 
+import nltk
 
 def _split_into_sentences(text: str) -> list[str]:
-    """Naive sentence splitter — good enough for chunk boundaries, not linguistically perfect."""
-    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
-    return [s for s in sentences if s]
+    """Sentence splitter using NLTK's punkt tokenizer — abbreviation-aware
+    (handles 'Dr. Smith', titles, etc.), more reliable than raw regex for
+    chunk boundaries. Not linguistically perfect on every edge case
+    (e.g. 'e.g.' mid-sentence), but strictly better than punctuation-only
+    splitting."""
+    text = text.strip()
+    if not text:
+        return []
+    sentences = nltk.sent_tokenize(text)
+    return [s.strip() for s in sentences if s.strip()]
 
 
 def _recursive_split(text: str, max_size: int) -> list[str]:
@@ -19,7 +25,7 @@ def _recursive_split(text: str, max_size: int) -> list[str]:
     Only recurses into a piece if it's still too big after a given separator.
     Falls back to a hard character cut only if no separator works at all.
     """
-    if len(text) <= max_size:
+    if len(text) <= max_size: #600
         return [text]
 
     for separator in ["\n\n", ". ", " "]:
@@ -48,6 +54,11 @@ def _recursive_split(text: str, max_size: int) -> list[str]:
 
     # last resort: hard cut by character count (should rarely trigger on real text)
     return [text[i:i + max_size] for i in range(0, len(text), max_size)]
+    #Equvalent to above list comprehension
+        # for i in range(0, len(text), max_size):
+        #     piece = text[i : i + max_size]
+        #     result.append(piece)
+        # return result
 
 
 def chunk_pages(pages: list[dict]) -> list[dict]:
@@ -71,14 +82,14 @@ def chunk_pages(pages: list[dict]) -> list[dict]:
         for piece in raw_pieces:
             sentences = _split_into_sentences(piece)
             if not sentences:
-                continue
+                continue # empty/whitespace-only, skip it —> move to the next piece,
 
             content = " ".join(carry_over_sentences + sentences).strip()
             if not content:
                 continue
 
             if len(content) < MIN_CHUNK_SIZE and all_chunks:
-                all_chunks[-1]["content"] += " " + content
+                all_chunks[-1]["content"] += " " + content #last chunk + merge small chunk into previous one
             else:
                 all_chunks.append({
                     "page_number": page_number,
@@ -86,7 +97,7 @@ def chunk_pages(pages: list[dict]) -> list[dict]:
                     "content": content,
                 })
                 chunk_index += 1
-
+            #overlap for the next piece in the loop:
             carry_over_sentences = (
                 sentences[-CHUNK_OVERLAP_SENTENCES:]
                 if len(sentences) >= CHUNK_OVERLAP_SENTENCES

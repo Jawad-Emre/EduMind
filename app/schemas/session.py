@@ -16,3 +16,11 @@ class SessionResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SessionSummaryResponse(BaseModel):
+    summary_text: str
+    topics_covered: list[str] = []
+    understood_well: list[str] = []
+    struggled_with: list[str] = []
+    review_suggestions: list[str] = []

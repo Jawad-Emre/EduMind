@@ -20,12 +20,42 @@ async def add_chunks(db: AsyncSession, chunks: list[dict], material_id: int) -> 
 
     return chunks
 
+from sentence_transformers import CrossEncoder
+
+_reranker = None  # loaded once, reused across calls
+
+
+def _get_reranker() -> CrossEncoder:
+    global _reranker
+    if _reranker is None:
+        _reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+    return _reranker
+
+
+def rerank_chunks(query_text: str, chunks: list[dict], top_k: int) -> list[dict]:
+    """
+    Re-scores retrieved chunks against the query using a cross-encoder,
+    then returns the top_k most relevant — more accurate than raw
+    cosine similarity alone since query and chunk are compared together.
+    """
+    if not chunks:
+        return []
+
+    reranker = _get_reranker()
+    pairs = [(query_text, chunk["content"]) for chunk in chunks]
+    scores = reranker.predict(pairs)
+
+    for chunk, score in zip(chunks, scores):
+        chunk["rerank_score"] = float(score)
+
+    ranked = sorted(chunks, key=lambda c: c["rerank_score"], reverse=True)
+    return ranked[:top_k]
 
 async def query_similar(
     db: AsyncSession,
     query_embedding: list[float],
     material_ids: list[int] | None = None,
-    top_k: int = 5,
+    top_k: int = 20,
 ) -> list[dict]:
     distance = Chunk.embedding.cosine_distance(query_embedding).label("distance")
 

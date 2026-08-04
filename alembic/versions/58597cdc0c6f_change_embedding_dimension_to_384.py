@@ -14,7 +14,9 @@ import pgvector.sqlalchemy
 
 # revision identifiers, used by Alembic.
 revision: str = '58597cdc0c6f'
-down_revision: Union[str, Sequence[str], None] = 'a3cbaba54a80'
+# Reparented onto the chain-repair migration that (re)creates chunks.embedding
+# and the pgvector extension, so a fresh DB can reach this revision.
+down_revision: Union[str, Sequence[str], None] = 'f0e1d2c3b4a5'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

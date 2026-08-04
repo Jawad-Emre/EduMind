@@ -1,6 +1,15 @@
 import asyncio
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.core.logging_config import setup_logging
+
+# Configure clean, friendly logging before anything else runs.
+setup_logging()
+logger = logging.getLogger("edumind")
+
 from app.api.routes.users import router as users_router
 from app.api.routes.subjects import router as subjects_router
 from app.api.routes.sessions import router as sessions_router
@@ -32,7 +41,9 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def warm_model():
+    logger.info("Starting EduMind — warming embedding model...")
     await asyncio.to_thread(_get_model)
+    logger.info("EduMind ready.")
 
 
 app.include_router(users_router)

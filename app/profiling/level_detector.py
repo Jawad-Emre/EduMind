@@ -1,5 +1,7 @@
-import re
 from datetime import datetime, timezone
+from functools import lru_cache
+
+from transformers import pipeline
 
 from app.db.models import LevelEnum
 
@@ -10,28 +12,58 @@ QUIZ_CORRECT_DELTA = 0.12
 QUIZ_FAILURE_PENALTY = 0.15
 DECAY_PER_WEEK_IDLE = 0.02
 
-ADVANCED_MARKERS = [
-    "asymptotic", "gradient", "eigenvalue", "polymorphism", "recursion",
-    "complexity", "optimization", "architecture", "trade-off", "implementation",
+ZEROSHOT_MODEL_NAME = "MoritzLaurer/deberta-v3-base-zeroshot-v2.0"
+
+SIGNAL_LABELS = [
+    "correct explanation",
+    "incorrect explanation",
+    "deep reasoning question",
+    "surface-level question",
+    "advanced technical vocabulary",
 ]
+
+# Formula weights — priors for now, not yet calibrated against real quiz outcomes.
+CORRECTNESS_WEIGHT = 0.5
+DEPTH_WEIGHT = 0.3
+VOCABULARY_WEIGHT = 0.2
+
+
+@lru_cache(maxsize=1)
+def _get_classifier():
+    """Load the zero-shot model once per process, not per call.
+
+    lru_cache guarantees this runs exactly once — first call loads the
+    ~440MB model into memory, every call after reuses the same instance.
+    """
+    return pipeline("zero-shot-classification", model=ZEROSHOT_MODEL_NAME)
 
 
 def score_message_signal(content: str) -> float:
     """
-    Cheap heuristic scorer (0-1): longer, more technical, well-structured
-    messages score higher. Not meant to be precise alone — combined with
-    spike-verification and capped-delta to resist gaming.
+    Local zero-shot NLI scorer (0-1): classifies the message against
+    correctness, reasoning depth, and vocabulary sophistication labels
+    in a single model call. No LLM API, no per-message network cost.
+
+    Combined downstream with spike-verification and capped-delta to
+    resist noisy or gamed signals.
     """
-    words = content.split()
-    if not words:
+    if not content or not content.strip():
         return 0.0
 
-    length_score = min(len(words) / 60, 1.0)
-    marker_hits = sum(1 for w in words if w.lower().strip(".,?!") in ADVANCED_MARKERS)
-    marker_score = min(marker_hits / 3, 1.0)
-    question_depth = 1.0 if re.search(r"\bwhy\b|\bhow\b.*\brelates?\b", content.lower()) else 0.5
+    classifier = _get_classifier()
+    result = classifier(content, SIGNAL_LABELS)
+    scores = dict(zip(result["labels"], result["scores"]))
 
-    return round((0.4 * length_score) + (0.4 * marker_score) + (0.2 * question_depth), 3)
+    correctness = scores.get("correct explanation", 0.5)
+    depth = scores.get("deep reasoning question", 0.5)
+    vocabulary = scores.get("advanced technical vocabulary", 0.5)
+
+    return round(
+        (CORRECTNESS_WEIGHT * correctness)
+        + (DEPTH_WEIGHT * depth)
+        + (VOCABULARY_WEIGHT * vocabulary),
+        3,
+    )
 
 
 def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:

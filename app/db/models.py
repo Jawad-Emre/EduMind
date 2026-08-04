@@ -65,6 +65,10 @@ class SubjectProfile(Base):
         SAEnum(LevelEnum), default=LevelEnum.beginner
     )
     confidence_score: Mapped[float] = mapped_column(Float, default=0.0)
+    # Compact, evolving learner profile: {"strengths": [...], "struggles": [...], "notes": "..."}
+    knowledge_state: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Unverified confidence jump awaiting a second consistent signal (see level_detector)
+    pending_spike: Mapped[float | None] = mapped_column(Float, nullable=True)
     last_updated: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
@@ -152,7 +156,10 @@ class SessionSummary(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     session_id: Mapped[int] = mapped_column(ForeignKey("chat_sessions.id"), unique=True)
     summary_text: Mapped[str] = mapped_column(Text)
-    embedding_id: Mapped[str] = mapped_column(String(255))
+    # Structured recap: {"topics_covered": [...], "understood_well": [...],
+    #                    "struggled_with": [...], "review_suggestions": [...]}
+    structured: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    embedding_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

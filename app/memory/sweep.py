@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import ChatSession, Message, RoleEnum
-from app.memory.session_store import generate_session_summary
+from app.memory.session_store import persist_session_summary
 
 INACTIVITY_THRESHOLD = timedelta(minutes=45)
 MIN_WORD_THRESHOLD = 50
@@ -44,6 +44,6 @@ async def sweep_stale_sessions(db: AsyncSession) -> int:
         closed_count += 1
 
         if total_words >= MIN_WORD_THRESHOLD:
-            await generate_session_summary(session.id, db)
+            await persist_session_summary(session.id, db, refresh=False)
 
     return closed_count
