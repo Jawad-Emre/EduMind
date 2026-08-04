@@ -1,0 +1,172 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-weight: 500;
+  font-size: 20px;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+.newButton {
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+}
+
+.card:hover {
+  border-color: #cbd5e1;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.cardName {
+  font-weight: 500;
+  font-size: 15px;
+  margin: 0;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: capitalize;
+}
+
+.badge.warning {
+  background-color: #fffbeb;
+  color: #b45309;
+}
+
+.badge.accent {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.badge.success {
+  background-color: #f0fdf4;
+  color: #15803d;
+}
+
+.progressTrack {
+  height: 6px;
+  background-color: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+}
+
+.progressFill.warning {
+  background-color: #f59e0b;
+}
+
+.progressFill.accent {
+  background-color: #3b82f6;
+}
+
+.progressFill.success {
+  background-color: #22c55e;
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem 0;
+  color: #64748b;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 320px;
+}
+
+.modalTitle {
+  font-weight: 500;
+  font-size: 16px;
+  margin: 0 0 1rem;
+}
+
+.input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cancelButton {
+  background: none;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}

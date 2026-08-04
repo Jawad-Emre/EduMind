@@ -1,0 +1,797 @@
+.appShell,
+.appShell * {
+    box-sizing: border-box;
+}
+
+/* Accent palette — small dose of color instead of flat gray-on-white */
+.appShell {
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --accent-soft: #818cf8;
+    min-height: 100vh;
+}
+
+/* ---- Sidebar: position: fixed, immune to ancestor overflow bugs
+   (this is what fixes the scroll-drift you saw) ---- */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    background-color: #faf9f7;
+    border-right: 1px solid #e5e3df;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.sidebarTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding: 0 4px;
+}
+
+.sidebarCloseButton {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.backLink {
+    font-size: 13px;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.backLink:hover {
+    color: var(--accent);
+}
+
+.newChatButton {
+    width: 100%;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.15);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.newChatButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.22);
+}
+
+.newChatButton:active {
+    transform: translateY(0);
+}
+
+.subjectCard {
+    background-color: #ffffff;
+    border: 1px solid #e5e3df;
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+}
+
+.subjectCardName {
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0 0 2px;
+}
+
+.subjectCardMeta {
+    font-size: 11px;
+    color: #94a3b8;
+    margin: 0;
+    text-transform: capitalize;
+}
+
+.sidebarLabel {
+    font-size: 11px;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 8px;
+    padding: 0 4px;
+}
+
+.sessionList {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: 2px;
+}
+
+.sessionItem {
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 0;
+    border-left: 3px solid transparent;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.sessionItem:hover {
+    background-color: #f1f0ed;
+}
+
+.sessionActive {
+    background-color: var(--accent-light);
+    border-left: 3px solid var(--accent);
+}
+
+.sessionDate {
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sessionMeta {
+    font-size: 11px;
+    color: #94a3b8;
+    margin: 2px 0 0;
+}
+
+.mobileMenuButton {
+    display: none;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 60;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+.sidebarOverlay {
+    display: none;
+}
+
+/* ---- Main: shifted right by the fixed sidebar's width ---- */
+.main {
+    margin-left: 260px;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.mainInner {
+    width: 100%;
+    max-width: 740px;
+    min-width: 0;
+    padding: 2.5rem 2rem 3rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-bottom: 1px solid #e5e3df;
+    margin-bottom: 1.5rem;
+}
+
+.tab {
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.tab:hover {
+    color: #0f172a;
+    background-color: #f8fafc;
+}
+
+.tabActive {
+    font-weight: 500;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    background-color: var(--accent-light);
+}
+
+.chatArea {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.messages {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 12px;
+    min-width: 0;
+}
+
+.emptyChat {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+    padding: 2rem 0;
+}
+
+.userBubble {
+    align-self: flex-end;
+    max-width: 75%;
+    min-width: 0;
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 14px 14px 2px 14px;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+    box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);
+}
+
+/* Row wraps the avatar + bubble together so alignment works cleanly */
+.assistantRow {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    max-width: 88%;
+    align-self: flex-start;
+    min-width: 0;
+}
+
+.avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #4338ca);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.assistantBubble {
+    min-width: 0;
+    background-color: #f8f8f7;
+    border: 1px solid #edece9;
+    padding: 12px 16px;
+    border-radius: 2px 14px 14px 14px;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.assistantBubble h1,
+.assistantBubble h2,
+.assistantBubble h3 {
+    font-weight: 500;
+    margin: 1rem 0 0.5rem;
+    line-height: 1.3;
+}
+
+.assistantBubble h1 { font-size: 20px; }
+.assistantBubble h2 { font-size: 17px; }
+.assistantBubble h3 { font-size: 15px; }
+
+.assistantBubble p {
+    margin: 0 0 0.75rem;
+    line-height: 1.7;
+}
+
+.assistantBubble p:last-child {
+    margin-bottom: 0;
+}
+
+.assistantBubble ul,
+.assistantBubble ol {
+    margin: 0 0 0.75rem;
+    padding-left: 1.5rem;
+    line-height: 1.7;
+}
+
+.assistantBubble li {
+    margin-bottom: 0.25rem;
+}
+
+.assistantBubble strong {
+    font-weight: 600;
+    color: #1e1b4b;
+}
+
+.assistantBubble code {
+    background-color: #eef2ff;
+    color: #4338ca;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: "SF Mono", Consolas, monospace;
+    overflow-wrap: anywhere;
+}
+
+.assistantBubble pre {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+    max-width: 100%;
+}
+
+.assistantBubble pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: 13px;
+}
+
+.assistantBubble blockquote {
+    border-left: 3px solid var(--accent-soft);
+    padding-left: 12px;
+    margin: 0.75rem 0;
+    color: #64748b;
+}
+
+.assistantBubble hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 1rem 0;
+}
+
+.assistantBubble table {
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 100%;
+}
+
+.assistantBubble th,
+.assistantBubble td {
+    border: 1px solid #e2e8f0;
+    padding: 6px 10px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.assistantBubble th {
+    background-color: #f8fafc;
+    font-weight: 500;
+}
+
+.tableWrapper {
+    max-width: 100%;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+    border-radius: 6px;
+}
+
+.typing {
+    font-size: 13px;
+    color: #94a3b8;
+    padding: 8px 14px;
+}
+
+.inputRow {
+    display: flex;
+    gap: 8px;
+    position: sticky;
+    bottom: 0;
+    background-color: #ffffff;
+    padding: 8px 0;
+}
+
+.chatInput {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 14px;
+    border: 1px solid #d8d5cf;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.chatInput:focus {
+    outline: none;
+    border-color: var(--accent-soft);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.chatInput:disabled {
+    opacity: 0.6;
+}
+
+.sendButton {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #ffffff;
+    border: none;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.12s ease;
+}
+
+.sendButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.sendButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem 0;
+    color: #64748b;
+}
+
+.readOnlyNotice {
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: center;
+    margin: 0 0 8px;
+}
+
+.dropzone {
+    border: 2px dashed #d8d5cf;
+    border-radius: 14px;
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.dropzone:hover {
+    border-color: var(--accent-soft);
+    background-color: var(--accent-light);
+}
+
+.dropzoneText {
+    font-size: 14px;
+    margin: 0 0 4px;
+}
+
+.dropzoneHint {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.materialsList {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5e3df;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.materialRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #edece9;
+    min-width: 0;
+    transition: background-color 0.12s ease;
+}
+
+.materialRow:hover {
+    background-color: #faf9f7;
+}
+
+.materialRow:last-child {
+    border-bottom: none;
+}
+
+.materialIcon {
+    font-size: 18px;
+}
+
+.materialInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.materialName {
+    font-size: 14px;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.statusBadge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    text-transform: capitalize;
+    flex-shrink: 0;
+}
+
+.statusReady { background-color: #f0fdf4; color: #15803d; }
+.statusProcessing { background-color: #fffbeb; color: #b45309; }
+.statusFailed { background-color: #fef2f2; color: #dc2626; }
+
+.quizStart {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.quizStartButtons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.secondaryButton {
+    background: none;
+    border: 1px solid #d8d5cf;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.secondaryButton:hover {
+    border-color: var(--accent-soft);
+    background-color: var(--accent-light);
+}
+
+.quizQuestion {
+    margin-bottom: 1.5rem;
+}
+
+.quizQuestionText {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0 0 10px;
+}
+
+.quizOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.quizOption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid #e5e3df;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.quizOption:hover {
+    border-color: var(--accent-soft);
+}
+
+.quizOptionSelected {
+    border: 2px solid var(--accent);
+    background-color: var(--accent-light);
+}
+
+.resultSummary {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.resultScore {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--accent);
+}
+
+.resultOption {
+    padding: 8px 12px;
+    border: 1px solid #e5e3df;
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.resultCorrect {
+    border-color: #86efac;
+    background-color: #f0fdf4;
+}
+
+.resultOptionText {
+    font-size: 14px;
+    margin: 0;
+}
+
+.resultExplanation {
+    font-size: 12px;
+    color: #64748b;
+    margin: 4px 0 0;
+}
+
+.summaryButton {
+    background: none;
+    border: 1px solid #d8d5cf;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #0f172a;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.summaryButton:hover:not(:disabled) {
+    border-color: var(--accent-soft);
+    background-color: var(--accent-light);
+}
+
+.summaryButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Pushed to the far right (margin-left:auto) so it sits apart from the
+   grouped Chat/Materials/Quizzes/Summarize controls. */
+.endSessionButton {
+    margin-left: auto;
+    background: none;
+    border: 1px solid #fca5a5;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #dc2626;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.endSessionButton:hover:not(:disabled) {
+    border-color: #dc2626;
+    background-color: #fef2f2;
+}
+
+.endSessionButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.codeBlockWrapper {
+    margin: 0.75rem 0;
+    max-width: 100%;
+}
+
+.codeBlockHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #eef2ff;
+    padding: 4px 10px;
+    border-radius: 8px 8px 0 0;
+    font-size: 11px;
+    color: #4338ca;
+    text-transform: uppercase;
+}
+
+.copyButton {
+    background: none;
+    border: none;
+    font-size: 11px;
+    color: #4338ca;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .mobileMenuButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .sidebarCloseButton {
+        display: block;
+    }
+
+    .sidebar {
+        width: 78vw;
+        max-width: 280px;
+        transform: translateX(-100%);
+        transition: transform 0.22s ease;
+        box-shadow: 4px 0 20px rgba(15, 23, 42, 0.15);
+    }
+
+    .sidebarOpen {
+        transform: translateX(0);
+    }
+
+    .sidebarOverlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(15, 23, 42, 0.4);
+        z-index: 65;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .mainInner {
+        padding: 3.5rem 1rem 2rem;
+    }
+
+    .userBubble {
+        max-width: 92%;
+    }
+
+    .assistantRow {
+        max-width: 92%;
+    }
+
+    .tabs {
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+
+    .summaryButton {
+        margin-left: 0;
+        order: 4;
+        width: 100%;
+        text-align: center;
+    }
+
+    .endSessionButton {
+        margin-left: 0;
+        order: 5;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 420px) {
+    .tab {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .quizStartButtons {
+        flex-direction: column;
+    }
+}
