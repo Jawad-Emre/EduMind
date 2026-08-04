@@ -1,10 +1,27 @@
+import nltk
+
 from app.core.exceptions import ExtractionError
 
 CHUNK_SIZE = 600              # target characters per chunk (soft target, not a hard ceiling)
 CHUNK_OVERLAP_SENTENCES = 2   # trailing sentences repeated into the next chunk, for context continuity
 MIN_CHUNK_SIZE = 150           # chunks smaller than this get merged into the previous chunk
 
-import nltk
+# The punkt tokenizer data isn't bundled with the nltk pip package — it must be
+# downloaded once. On a dev machine it's usually already cached, but on a fresh
+# deploy it isn't, so ensure it lazily on first use instead of crashing with a
+# LookupError mid-ingestion. Different nltk versions ship different resource
+# names ('punkt' vs the newer 'punkt_tab'), so try both.
+_punkt_ready = False
+
+
+def _download_punkt() -> None:
+    for resource in ("punkt", "punkt_tab"):
+        try:
+            nltk.download(resource, quiet=True)
+        except Exception:
+            # punkt_tab doesn't exist on older nltk; punkt is enough there.
+            pass
+
 
 def _split_into_sentences(text: str) -> list[str]:
     """Sentence splitter using NLTK's punkt tokenizer — abbreviation-aware
@@ -12,10 +29,18 @@ def _split_into_sentences(text: str) -> list[str]:
     chunk boundaries. Not linguistically perfect on every edge case
     (e.g. 'e.g.' mid-sentence), but strictly better than punctuation-only
     splitting."""
+    global _punkt_ready
     text = text.strip()
     if not text:
         return []
-    sentences = nltk.sent_tokenize(text)
+    try:
+        sentences = nltk.sent_tokenize(text)
+    except (LookupError, OSError):
+        # punkt data missing or partially cached (fresh deploy) — fetch and retry once.
+        if not _punkt_ready:
+            _download_punkt()
+            _punkt_ready = True
+        sentences = nltk.sent_tokenize(text)
     return [s.strip() for s in sentences if s.strip()]
 
 
