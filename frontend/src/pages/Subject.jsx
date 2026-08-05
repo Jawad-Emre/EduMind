@@ -111,6 +111,7 @@ function Subject() {
     const [quizAnswers, setQuizAnswers] = useState({});
     const [quizResult, setQuizResult] = useState(null);
     const [generatingQuiz, setGeneratingQuiz] = useState(false);
+    const [quizCount, setQuizCount] = useState(5);
 
     const [summaryLoading, setSummaryLoading] = useState(false);
     const [endingSession, setEndingSession] = useState(false);
@@ -284,7 +285,7 @@ function Subject() {
         setQuizResult(null);
         setQuizAnswers({});
 
-        const payload = { subject_id: parseInt(subjectId), num_questions: 5 };
+        const payload = { subject_id: parseInt(subjectId), num_questions: quizCount };
         if (source === "material") {
             const readyMaterial = materials.find((m) => m.upload_status === "ready");
             if (!readyMaterial) {
@@ -630,6 +631,22 @@ function Subject() {
                             {!quiz && !generatingQuiz && (
                                 <div className={styles.quizStart}>
                                     <p className={styles.emptyChat}>Generate a quiz to test your understanding.</p>
+                                    <div className={styles.quizCountRow}>
+                                        <label htmlFor="quizCount" className={styles.quizCountLabel}>
+                                            Number of questions
+                                        </label>
+                                        <select
+                                            id="quizCount"
+                                            className={styles.quizCountSelect}
+                                            value={quizCount}
+                                            onChange={(e) => setQuizCount(parseInt(e.target.value))}
+                                        >
+                                            <option value={5}>5</option>
+                                            <option value={10}>10</option>
+                                            <option value={15}>15</option>
+                                            <option value={20}>20</option>
+                                        </select>
+                                    </div>
                                     <div className={styles.quizStartButtons}>
                                         <button className={styles.newChatButton} onClick={() => handleGenerateQuiz("material")}>
                                             From uploaded material

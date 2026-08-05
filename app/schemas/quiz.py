@@ -1,12 +1,14 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class QuizGenerateRequest(BaseModel):
     subject_id: int
     material_id: int | None = None
     session_id: int | None = None
-    num_questions: int = 5
+    # Clamp to a sane range: at least 1 question, at most 20 (keeps the LLM
+    # prompt/response size bounded and generation reliable).
+    num_questions: int = Field(default=5, ge=1, le=20)
 
 
 class QuizSubmitRequest(BaseModel):

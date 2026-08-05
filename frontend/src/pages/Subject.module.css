@@ -558,6 +558,29 @@
     flex-wrap: wrap;
 }
 
+.quizCountRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.quizCountLabel {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.quizCountSelect {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: #fff;
+    cursor: pointer;
+}
+
 .secondaryButton {
     background: none;
     border: 1px solid #d8d5cf;
