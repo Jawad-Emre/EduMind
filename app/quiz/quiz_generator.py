@@ -4,6 +4,8 @@ from app.generation.llm_client import generate_response
 from app.core.exceptions import ExtractionError
 from app.core.json_utils import repair_and_parse_json
 
+MAX_SUPPORTED_QUESTIONS = 10
+
 QUIZ_GENERATION_PROMPT = (
     "Based on the following study material, generate {num_questions} multiple-choice "
     "quiz questions to test understanding. For EACH option, include a short one-sentence "
@@ -28,6 +30,8 @@ def generate_quiz_questions(material_text: str, num_questions: int = 5) -> list[
     Takes combined chunk text from a StudyMaterial and generates quiz questions.
     Returns a list of {"question", "options", "correct_answer"} dicts.
     """
+    if num_questions > MAX_SUPPORTED_QUESTIONS:
+        num_questions = MAX_SUPPORTED_QUESTIONS
     prompt = [
         {"role": "system", "content": "You are a quiz generator. Output only valid JSON."},
         {
