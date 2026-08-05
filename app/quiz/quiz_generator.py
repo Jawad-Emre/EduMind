@@ -2,18 +2,22 @@ import json
 
 from app.generation.llm_client import generate_response
 from app.core.exceptions import ExtractionError
+from app.core.json_utils import repair_and_parse_json
 
 QUIZ_GENERATION_PROMPT = (
     "Based on the following study material, generate {num_questions} multiple-choice "
     "quiz questions to test understanding. For EACH option, include a short one-sentence "
     "explanation of why it's correct or incorrect. Return ONLY valid JSON, no other text, "
-    "in this exact format:\n"
-    '[{{"question": "...", "options": [\n'
-    '  {{"text": "A", "is_correct": true, "explanation": "..."}},\n'
-    '  {{"text": "B", "is_correct": false, "explanation": "..."}},\n'
-    '  {{"text": "C", "is_correct": false, "explanation": "..."}},\n'
-    '  {{"text": "D", "is_correct": false, "explanation": "..."}}\n'
-    "]}}]\n\n"
+    "in this exact format (note the top-level object wrapper with a 'questions' key — this "
+    "is required for the JSON parser):\n"
+    '{{"questions": [\n'
+    '  {{"question": "...", "options": [\n'
+    '    {{"text": "A", "is_correct": true, "explanation": "..."}},\n'
+    '    {{"text": "B", "is_correct": false, "explanation": "..."}},\n'
+    '    {{"text": "C", "is_correct": false, "explanation": "..."}},\n'
+    '    {{"text": "D", "is_correct": false, "explanation": "..."}}\n'
+    "  ]}}\n"
+    "]}}\n\n"
     "MATERIAL:\n{material_text}"
 )
 
@@ -34,19 +38,25 @@ def generate_quiz_questions(material_text: str, num_questions: int = 5) -> list[
         },
     ]
 
-    raw_response = generate_response(prompt, max_tokens=2500)
-
-    cleaned = raw_response.strip()
-    if cleaned.startswith("```"):
-        cleaned = cleaned.split("```")[1]
-        if cleaned.startswith("json"):
-            cleaned = cleaned[4:]
-    cleaned = cleaned.strip()
+    # json_mode=True constrains Groq to emit syntactically valid JSON (prevents the
+    # malformed-JSON failures that broke quiz parsing before). The prompt was changed
+    # to wrap the array in an object ({"questions": [...]}) because json_mode requires
+    # a top-level object, not a bare array.
+    raw_response = generate_response(prompt, max_tokens=2500, json_mode=True)
 
     try:
-        questions = json.loads(cleaned)
+        data = repair_and_parse_json(raw_response, context="Quiz")
     except json.JSONDecodeError as e:
         raise ExtractionError(f"Quiz generation returned invalid JSON: {e}")
+
+    # Unwrap the object wrapper to get the questions array.
+    if isinstance(data, dict) and "questions" in data:
+        questions = data["questions"]
+    elif isinstance(data, list):
+        # Fallback: if the model ignored the wrapper instruction and returned a bare array anyway.
+        questions = data
+    else:
+        raise ExtractionError("Quiz generation returned unexpected JSON structure")
 
     if not isinstance(questions, list) or not questions:
         raise ExtractionError("Quiz generation returned no usable questions")

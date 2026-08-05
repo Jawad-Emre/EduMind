@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import ChatSession, Message, SessionSummary, SubjectProfile, RoleEnum
 from app.generation.llm_client import generate_response
 from app.core.exceptions import ExtractionError
+from app.core.json_utils import repair_and_parse_json
 
 # Cap on how many strengths/struggles we keep per subject — keeps the profile
 # compact and cheap to inject into every prompt.
@@ -116,18 +117,11 @@ def _build_transcript(messages: list[Message]) -> str:
 def _parse_summary_json(raw_response: str) -> dict:
     """Strip code fences and parse the model's JSON reply.
 
-    Mirrors the defensive parsing used in app/quiz/quiz_generator.py.
-    Raises ExtractionError on anything unusable.
+    Uses the repair parser to tolerate common LLM mistakes (unescaped control
+    characters, trailing commas, etc.). Raises ExtractionError on anything unusable.
     """
-    cleaned = raw_response.strip()
-    if cleaned.startswith("```"):
-        cleaned = cleaned.split("```")[1]
-        if cleaned.startswith("json"):
-            cleaned = cleaned[4:]
-    cleaned = cleaned.strip()
-
     try:
-        data = json.loads(cleaned)
+        data = repair_and_parse_json(raw_response, context="Summary")
     except json.JSONDecodeError as e:
         raise ExtractionError(f"Summary generation returned invalid JSON: {e}")
 
@@ -186,7 +180,9 @@ async def build_structured_summary(session_id: int, db: AsyncSession) -> dict | 
 
     try:
         # generate_response is a blocking (sync) network call — keep it off the event loop.
-        raw = await asyncio.to_thread(generate_response, prompt, 2500)
+        # json_mode=True constrains Groq to emit syntactically valid JSON (prevents the
+        # unescaped-control-char failures that broke summary parsing before).
+        raw = await asyncio.to_thread(generate_response, prompt, 2500, json_mode=True)
         return _parse_summary_json(raw)
     except ExtractionError as e:
         # Generation or JSON parsing failed. Log the real cause and re-raise so

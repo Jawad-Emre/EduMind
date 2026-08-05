@@ -16,26 +16,37 @@ def _get_client() -> Groq:
     return _client
 
 
-def generate_response(messages: list[dict], max_tokens: int = 3500) -> str:
+def generate_response(
+    messages: list[dict],
+    max_tokens: int = 3500,
+    json_mode: bool = False,
+) -> str:
     """
     Takes a messages list (from prompt_builder.build_prompt) and returns
     the model's text response. Retries once on transient errors.
-    """
-    """
-    Yields text chunks as they're generated, instead of returning
-    the full response at once. Caller is responsible for assembling
-    the full text if needed (e.g., for saving to DB after streaming ends).
+
+    When json_mode=True, asks Groq to constrain the output to valid JSON
+    (response_format json_object). This prevents the malformed-JSON failures
+    (unescaped control chars, missing delimiters) that break summary/quiz
+    parsing. The prompt must mention "JSON" for this mode to work, and the
+    top-level value must be a JSON object (not a bare array).
     """
     client = _get_client()
+
+    kwargs = {
+        "model": MODEL_NAME,
+        "temperature": 0.4,
+        "max_tokens": max_tokens,
+    }
+    if json_mode:
+        kwargs["response_format"] = {"type": "json_object"}
 
     last_error = None
     for attempt in range(MAX_RETRIES + 1):
         try:
             completion = client.chat.completions.create(
-                model=MODEL_NAME,
                 messages=messages,
-                temperature=0.4,
-                max_tokens=max_tokens,
+                **kwargs,
             )
 
             content = completion.choices[0].message.content
